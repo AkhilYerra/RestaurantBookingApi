@@ -17,28 +17,28 @@ public class ReservationDaoImpl implements ReservationDao{
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
-    public List<Reservation> findExistingReservationsForUsers(SearchRequest request){
-        String query = "SELECT r.id AS reservationId, r.timeStart AS timeStart, r.timeEnd AS timeEnd, r.tableId AS tableId, r.restaurantId AS restaurantId, " +
-                "GROUP_CONCAT(ru.userId) AS userIds " +
-                "FROM Reservation r " +
-                "JOIN ReservationUsers ru ON r.id = ru.reservationId " +
-                "WHERE ru.userId IN (:userIds) " +
-                "AND r.timeStart >= :startTime " +
-                "AND r.timeEnd <= :endTime " +
-                "GROUP BY r.id " +
-                "ORDER BY r.timeStart ASC " +
+    public List<Reservation> findReservations(ReservationFilter filter){
+        String query = "SELECT resy.id AS reservationId, resy.time_start AS timeStart, resy.time_end AS timeEnd, resy.table_id AS tableId, resy.restaurant_id AS restaurantId, " +
+                "GROUP_CONCAT(userRes.userId) AS userIds " +
+                "FROM Reservation resy " +
+                "JOIN ReservationUsers userRes ON resy.id = userRes.reservationId " +
+                "WHERE userRes.userId IN (:userIds) " +
+                "AND resy.timeStart >= :startTime " +
+                "AND resy.timeEnd <= :endTime " +
+                "GROUP BY resy.id " +
+                "ORDER BY resy.timeStart ASC " +
                 "LIMIT :limit OFFSET :offset";
 
         //We are supporting some form of pagination as the user might have more than whatever
         // the x amount of reservations can be shown on a screen. We sort by date the reservation starts
         // in the case of FE wanting to show reservations to the user. Although not needed from BE perspective rn
-        int offset = (request.getPageNumber() - 1) * request.getPageSize();
+        Integer offset = (filter.getPageNumber() - 1) * filter.getPageSize();
 
             MapSqlParameterSource params = new MapSqlParameterSource()
-                    .addValue("userIds", request.getUserIds())
-                    .addValue("startTime", request.getReservationTime())
-                    .addValue("endTime", request.getReservationTime())
-                    .addValue("limit", request.getPageSize())
+                    .addValue("userIds", filter.getUserIds())
+                    .addValue("startTime", filter.getStartTime())
+                    .addValue("endTime", filter.getEndTime())
+                    .addValue("limit", filter.getPageSize())
                     .addValue("offset", offset);
 
             List<Map<String, Object>> results = jdbcTemplate.queryForList(query, params);

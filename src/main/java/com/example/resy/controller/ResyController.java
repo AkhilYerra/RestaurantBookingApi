@@ -19,15 +19,20 @@ public class ResyController {
     @Autowired
     ResyFacade resyFacade;
 
-    @GetMapping("/resy")
+    @GetMapping("/reservation")
     public ResponseEntity<List<Restaurant>> getReservation(SearchRequest searchRequest) {
        return ResponseEntity.ok(resyFacade.searchForReservation(searchRequest));
     }
 
-    @PostMapping("/create")
+    @PostMapping("/reservation")
     public ResponseEntity<Void> createReservation(@RequestBody Reservation reservation) {
             resyFacade.createReservation(reservation);
             return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/reservation")
+    public ResponseEntity<Void> deleteReservation(@RequestBody Long reservationId){
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
