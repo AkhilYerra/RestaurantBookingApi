@@ -10,6 +10,8 @@ public class SearchRequest {
     private int minimumGuests;
     private Date reservationTime;
     Set<DietaryRestriction> dietaryRestrictions;
+    private int pageNumber;
+    private int pageSize;
 
     public Set<Long> getUserIds(){
         return userIds;
@@ -43,4 +45,19 @@ public class SearchRequest {
         this.dietaryRestrictions = restrictions;
     }
 
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
 }

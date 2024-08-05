@@ -18,18 +18,28 @@ public class ReservationDaoImpl implements ReservationDao{
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     public List<Reservation> findExistingReservationsForUsers(SearchRequest request){
-            String query = "SELECT r.id AS reservationId, r.timeStart as timeStart, r.timeEnd as timeEnd, r.tableId as tableId, r.restaurantId as restaurantId" +
+        String query = "SELECT r.id AS reservationId, r.timeStart AS timeStart, r.timeEnd AS timeEnd, r.tableId AS tableId, r.restaurantId AS restaurantId, " +
                 "GROUP_CONCAT(ru.userId) AS userIds " +
                 "FROM Reservation r " +
                 "JOIN ReservationUsers ru ON r.id = ru.reservationId " +
                 "WHERE ru.userId IN (:userIds) " +
                 "AND r.timeStart >= :startTime " +
-                "AND r.timeEnd <= :endTime ";
+                "AND r.timeEnd <= :endTime " +
+                "GROUP BY r.id " +
+                "ORDER BY r.timeStart ASC " +
+                "LIMIT :limit OFFSET :offset";
+
+        //We are supporting some form of pagination as the user might have more than whatever
+        // the x amount of reservations can be shown on a screen. We sort by date the reservation starts
+        // in the case of FE wanting to show reservations to the user. Although not needed from BE perspective rn
+        int offset = (request.getPageNumber() - 1) * request.getPageSize();
 
             MapSqlParameterSource params = new MapSqlParameterSource()
                     .addValue("userIds", request.getUserIds())
                     .addValue("startTime", request.getReservationTime())
-                    .addValue("endTime", request.getReservationTime());
+                    .addValue("endTime", request.getReservationTime())
+                    .addValue("limit", request.getPageSize())
+                    .addValue("offset", offset);
 
             List<Map<String, Object>> results = jdbcTemplate.queryForList(query, params);
 
