@@ -6,6 +6,5 @@ public enum DietaryRestriction {
     GLUTEN_INTOLERANT,
     VEGETARIAN,
     KOSHER,
-    PALEO,
-    DIABETIC;
+    PALEO;
 }

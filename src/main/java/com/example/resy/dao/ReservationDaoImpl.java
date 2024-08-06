@@ -8,40 +8,39 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+@Component
 public class ReservationDaoImpl implements ReservationDao{
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     public List<Reservation> findReservations(ReservationFilter filter){
-        String query = "SELECT resy.id AS reservationId, resy.time_start AS timeStart, resy.time_end AS timeEnd, resy.table_id AS tableId, resy.restaurant_id AS restaurantId, " +
-                "GROUP_CONCAT(userRes.userId) AS userIds " +
-                "FROM Reservation resy " +
-                "JOIN ReservationUsers userRes ON resy.id = userRes.reservationId " +
-                "WHERE userRes.userId IN (:userIds) " +
-                "AND resy.timeStart >= :startTime " +
-                "AND resy.timeEnd <= :endTime " +
-                "GROUP BY resy.id " +
-                "ORDER BY resy.timeStart ASC " +
+        String query = "SELECT res.id AS reservationId, res.start_time AS timeStart, res.end_time AS timeEnd, res.table_id AS tableId, res.restaurant_id AS restaurantId, " +
+                "GROUP_CONCAT(userRes.user_id) AS userIds " +
+                "FROM reservation res " +
+                "JOIN user_reservation userRes ON res.id = userRes.reservation_id " +
+                "WHERE userRes.user_id IN (:userIds) " +
+                "AND res.start_time >= :startTime " +
+                "AND res.end_time <= :endTime " +
+                "GROUP BY res.id " +
+                "ORDER BY res.start_time ASC " +
                 "LIMIT :limit OFFSET :offset";
 
-        //We are supporting some form of pagination as the user might have more than whatever
-        // the x amount of reservations can be shown on a screen. We sort by date the reservation starts
-        // in the case of FE wanting to show reservations to the user. Although not needed from BE perspective rn
-        Integer offset = (filter.getPageNumber() - 1) * filter.getPageSize();
 
-            MapSqlParameterSource params = new MapSqlParameterSource()
-                    .addValue("userIds", filter.getUserIds())
-                    .addValue("startTime", filter.getStartTime())
-                    .addValue("endTime", filter.getEndTime())
-                    .addValue("limit", filter.getPageSize())
-                    .addValue("offset", offset);
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userIds", filter.getUserIds())
+                .addValue("startTime", filter.getStartTime())
+                .addValue("endTime", filter.getEndTime())
+                .addValue("limit", filter.getPageSize())
+                .addValue("offset", (filter.getPageNumber() - 1) * filter.getPageSize());
 
-            List<Map<String, Object>> results = jdbcTemplate.queryForList(query, params);
+        List<Map<String, Object>> results = jdbcTemplate.queryForList(query, params);
 
             List<Reservation> reservationList = new ArrayList<>();
             for (Map<String, Object> row : results) {

@@ -5,10 +5,12 @@ import com.example.resy.data.request.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 public class RestaurantDaoImpl implements RestaurantDao{
 
     @Autowired

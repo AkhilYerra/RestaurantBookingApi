@@ -24,9 +24,9 @@ public class SearchRequestToReservationFilterTransformer implements Transformer<
         }
 
         if (searchRequest.getPageSize() != null) {
-            filter.setPageNumber(searchRequest.getPageSize());
+            filter.setPageSize(searchRequest.getPageSize());
         } else {
-            filter.setPageNumber(20);
+            filter.setPageSize(20);
         }
 
         if(!CollectionUtils.isEmpty(searchRequest.getUserIds())){
