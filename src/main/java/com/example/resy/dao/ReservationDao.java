@@ -12,4 +12,8 @@ public interface ReservationDao {
     Long createReservation(Reservation reservation);
 
     void updateReservationUpdateTable(List<Long> userIds, Long createdId);
+
+    void deleteReservation(Long id);
+
+    void deleteUserReservations(Long id);
 }

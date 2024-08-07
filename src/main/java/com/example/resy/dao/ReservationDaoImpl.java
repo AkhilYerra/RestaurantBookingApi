@@ -103,6 +103,24 @@ public class ReservationDaoImpl implements ReservationDao{
         }
     }
 
+    @Override
+    public void deleteReservation(Long id) {
+        String DELETE_RESERVATION_QUERY = "DELETE FROM reservation WHERE id = :id";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", id);
+
+        jdbcTemplate.update(DELETE_RESERVATION_QUERY, params);
+    }
+
+    @Override
+    public void deleteUserReservations(Long id) {
+        String DELETE_RESERVATION_QUERY = "DELETE FROM user_reservation WHERE reservation_id = :id";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", id);
+
+        jdbcTemplate.update(DELETE_RESERVATION_QUERY, params);
+    }
+
     public List<Reservation> filterReservations(ReservationFilter filter){
         String checkQuery = "SELECT res.id as id, res.table_id as tableId, FROM Reservation res" +
                 "WHERE tableId = :tableId " +

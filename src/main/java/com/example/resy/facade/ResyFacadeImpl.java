@@ -88,6 +88,17 @@ public class ResyFacadeImpl implements ResyFacade{
         }
     }
 
+    @Override
+    @Transactional
+    public void deleteReservation(Long reservationId) {
+        try{
+            reservationDao.deleteUserReservations(reservationId);
+            reservationDao.deleteReservation(reservationId);
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
     public List<Reservation> filterForReservations(ReservationFilter filter){
         return reservationDao.findReservations(filter);
     }

@@ -43,9 +43,10 @@ public class ResyController {
         }
     }
 
-    @DeleteMapping("/reservation")
-    public ResponseEntity<Void> deleteReservation(@RequestBody Long reservationId){
-        return new ResponseEntity<>(HttpStatus.OK);
+    @DeleteMapping("/reservation/{reservationId}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId) {
+        resyFacade.deleteReservation(reservationId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }
