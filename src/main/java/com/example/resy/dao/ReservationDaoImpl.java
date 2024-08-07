@@ -74,11 +74,12 @@ public class ReservationDaoImpl implements ReservationDao{
     @Transactional
     public Long createReservation(Reservation reservation) {
         // Create the reservation
-        String insertReservationQuery = "INSERT INTO Reservation (timeStart, timeEnd, tableId) VALUES (:startTime, :endTime, :tableId)";
+        String insertReservationQuery = "INSERT INTO reservation (start_time, end_time, table_id, restaurant_id) VALUES (:startTime, :endTime, :tableId, :restaurantId)";
         MapSqlParameterSource insertParams = new MapSqlParameterSource()
                 .addValue("startTime", reservation.getStartTime())
                 .addValue("endTime", reservation.getEndTime())
-                .addValue("tableId", reservation.getTableId());
+                .addValue("tableId", reservation.getTableId())
+                .addValue("restaurantId", reservation.getRestaurantId());
 
         //Get the created Id to update Reservation User Table.
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -89,13 +90,15 @@ public class ReservationDaoImpl implements ReservationDao{
     @Override
     public void updateReservationUpdateTable(List<Long> userIds, Long createdId){
         if(createdId != null){
-            String insertUsersQuery = "INSERT INTO ReservationUsers (reservationId, userId) VALUES (:reservationId, :userId)";
-            for (Long userId : userIds) {
-                MapSqlParameterSource userParams = new MapSqlParameterSource()
-                        .addValue("reservationId", createdId)
-                        .addValue("userId", userId);
-                jdbcTemplate.update(insertUsersQuery, userParams);
-            }
+            String insertUsersQuery = "INSERT INTO user_reservation (reservation_id, user_id) VALUES (:reservationId, :userId)";
+
+            List<MapSqlParameterSource> batchArgs = userIds.stream()
+                    .map(userId -> new MapSqlParameterSource()
+                            .addValue("reservationId", createdId)
+                            .addValue("userId", userId))
+                    .collect(Collectors.toList());
+
+            jdbcTemplate.batchUpdate(insertUsersQuery, batchArgs.toArray(new MapSqlParameterSource[0]));
 
         }
     }

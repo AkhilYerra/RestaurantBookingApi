@@ -9,12 +9,14 @@ com/example/resy/data/error/GenericException.class
 com/example/resy/facade/ResyFacade.class
 com/example/resy/dao/ReservationDaoImpl.class
 com/example/resy/transformers/SearchRequestToReservationFilterTransformer.class
+com/example/resy/data/error/ReservationLockException.class
 com/example/resy/transformers/Transformer.class
 com/example/resy/data/User.class
 com/example/resy/data/Restaurant.class
 com/example/resy/data/request/SearchRequest.class
 com/example/resy/data/filter/ReservationFilter.class
 com/example/resy/config/AppConfig.class
+com/example/resy/config/RedissonConfig.class
 com/example/resy/data/filter/UserFilter.class
 com/example/resy/controller/GlobalExceptionHandler.class
 com/example/resy/ResyApplication.class

@@ -35,8 +35,12 @@ public class ResyController {
 
     @PostMapping("/reservation")
     public ResponseEntity<Void> createReservation(@RequestBody Reservation reservation) {
+        try {
             resyFacade.createReservation(reservation);
             return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @DeleteMapping("/reservation")

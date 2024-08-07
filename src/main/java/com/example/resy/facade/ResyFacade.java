@@ -9,5 +9,5 @@ public interface ResyFacade {
 
     List<Restaurant> searchForReservation(SearchRequest searchRequest);
 
-    void createReservation(Reservation reservation);
+    void createReservation(Reservation reservation) throws InterruptedException;
 }
