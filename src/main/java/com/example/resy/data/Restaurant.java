@@ -1,12 +1,13 @@
 package com.example.resy.data;
 
 import java.util.List;
+import java.util.Set;
 
 public class Restaurant {
     public String name;
     public Long id;
     private List<Table> tableList;
-    private List<DietaryRestriction> endorsements;
+    private Set<DietaryRestriction> endorsements;
     //Todo: Add location data later
 
 
@@ -34,11 +35,11 @@ public class Restaurant {
         this.tableList = tableList;
     }
 
-    public List<DietaryRestriction> getEndorsements() {
+    public Set<DietaryRestriction> getEndorsements() {
         return endorsements;
     }
 
-    public void setEndorsements(List<DietaryRestriction> endorsements) {
+    public void setEndorsements(Set<DietaryRestriction> endorsements) {
         this.endorsements = endorsements;
     }
 }
