@@ -4,7 +4,7 @@ public class Table {
 
     private Long id;
     private Long restaurant_id;
-    private int capacity;
+    private Integer capacity;
 
 
     public Long getId() {
@@ -23,11 +23,11 @@ public class Table {
         this.restaurant_id = restaurant_id;
     }
 
-    public int getCapacity() {
+    public Integer getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(int capacity) {
+    public void setCapacity(Integer capacity) {
         this.capacity = capacity;
     }
 }

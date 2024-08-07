@@ -1,6 +1,8 @@
 package com.example.resy.data.request;
 
 import com.example.resy.data.DietaryRestriction;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.Set;
@@ -8,6 +10,9 @@ import java.util.Set;
 public class SearchRequest {
     Set<Long> userIds;
     private int minimumGuests;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm")
     private Date reservationTime;
     Set<DietaryRestriction> dietaryRestrictions;
     private Integer pageNumber;
@@ -31,7 +36,7 @@ public class SearchRequest {
     }
 
     public Date getReservationTime(){
-        return reservationTime;
+        return this.reservationTime;
     }
 
     public void setReservationTime(Date reservationTime){

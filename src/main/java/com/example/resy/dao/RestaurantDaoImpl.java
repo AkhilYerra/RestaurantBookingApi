@@ -1,11 +1,13 @@
 package com.example.resy.dao;
 
 import com.example.resy.data.Restaurant;
+import com.example.resy.data.Table;
 import com.example.resy.data.request.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,22 +22,26 @@ public class RestaurantDaoImpl implements RestaurantDao{
     public List<Restaurant> findOpenRestaurantsAtTime(SearchRequest request) {
         MapSqlParameterSource params = new MapSqlParameterSource();
 
-        int offset = (request.getPageNumber() - 1) * request.getPageSize();
+        int offset = (request.getPageNumber() -1) * request.getPageSize();
 
         //We could expand functionality later to order restaurants by popularity
         // or some form of popularity and rating so the better ones show up first
-        String restaurantQuery = "SELECT r.id as id, r.name as name " +
-                "FROM restaurants r " +
-                "JOIN restaurant_endorsements re ON r.id = re.restaurant_id " +
-                "JOIN tables t ON r.id = t.restaurant_id " +
-                "WHERE re.endorsement IN (:restrictions) " +
-                "  AND t.capacity >= :minimumGuests " +
+        String restaurantQuery = "SELECT r.id as id, r.name as name, t.id as tableId, t.capacity AS tableCapacity" +
+                " FROM restaurant r ";
+        if(!CollectionUtils.isEmpty(request.getDietaryRestrictions())){
+            restaurantQuery += "JOIN restaurant_endorsement re ON r.id = re.restaurant_id ";
+        }
+        restaurantQuery += "JOIN restaurant_table t ON r.id = t.restaurant_id ";
+        if(!CollectionUtils.isEmpty(request.getDietaryRestrictions())){
+            restaurantQuery += "WHERE re.endorsement IN (:restrictions) ";
+        }
+        restaurantQuery +=     "  AND t.capacity >= :minimumGuests " +
                 "  AND t.id NOT IN ( " +
                 "      SELECT reservation.table_id " +
-                "      FROM reservations reservation " +
-                "      WHERE reservation.reservation_time BETWEEN :startTime AND :endTime " +
+                "      FROM reservation reservation " +
+                "     WHERE (reservation.start_time < :endTime AND reservation.end_time > :startTime)  " +
                 "  ) " +
-                "GROUP BY r.id, r.name " +
+                "GROUP BY t.id " +
                 "ORDER BY r.name ASC " +
                 "LIMIT :limit OFFSET :offset";
 
@@ -46,7 +52,7 @@ public class RestaurantDaoImpl implements RestaurantDao{
         calendar.add(Calendar.HOUR_OF_DAY, 2);
         Date endTime = calendar.getTime();
 
-        params.addValue("restrictions", request.getDietaryRestrictions());
+//        params.addValue("restrictions", request.getDietaryRestrictions());
         params.addValue("minimumGuests", request.getMinimumGuests());
         params.addValue("startTime", request.getReservationTime());
         params.addValue("endTime", endTime);
@@ -55,14 +61,30 @@ public class RestaurantDaoImpl implements RestaurantDao{
 
         List<Map<String, Object>> rawSQLResults = jdbcTemplate.queryForList(restaurantQuery, params);
 
+        Map<Long, Restaurant> restaurantMap = new HashMap<>();
         List<Restaurant> restaurantList = new ArrayList<>();
         for (Map<String, Object> row : rawSQLResults) {
-            Restaurant restaurant = new Restaurant();
-            restaurant.setId(((Number) row.get("id")).longValue());
-            restaurant.setName((String) row.get("name"));
-
-            restaurantList.add(restaurant);
+            Long restaurantId = ((Number) row.get("id")).longValue();
+            if(restaurantMap.get(restaurantId) == null){
+                Restaurant restaurant = new Restaurant();
+                restaurant.setId(((Number) row.get("id")).longValue());
+                restaurant.setName((String) row.get("name"));
+                List<Table> tables = new ArrayList<>();
+                Table table = new Table();
+                table.setRestaurant_id(restaurantId);
+                table.setId(((Number) row.get("tableId")).longValue());
+                table.setCapacity(((Number) row.get("tableCapacity")).intValue());
+                tables.add(table);
+                restaurant.setTableList(tables);
+                restaurantMap.put(restaurantId, restaurant);
+            }else{
+                Table table = new Table();
+                table.setRestaurant_id(restaurantId);
+                table.setId(((Number) row.get("tableId")).longValue());
+                table.setCapacity(((Number) row.get("tableCapacity")).intValue());
+                restaurantMap.get(restaurantId).getTableList().add(table);
+            }
         }
-        return restaurantList;
+        return restaurantMap.values().stream().toList();
     }
 }

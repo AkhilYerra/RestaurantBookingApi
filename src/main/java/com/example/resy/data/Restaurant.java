@@ -1,8 +1,11 @@
 package com.example.resy.data;
 
+import java.util.List;
+
 public class Restaurant {
     public String name;
     public Long id;
+    private List<Table> tableList;
     //Todo: Add location data later
 
 
@@ -20,5 +23,13 @@ public class Restaurant {
 
     public String getName() {
         return name;
+    }
+
+    public List<Table> getTableList() {
+        return tableList;
+    }
+
+    public void setTableList(List<Table> tableList) {
+        this.tableList = tableList;
     }
 }

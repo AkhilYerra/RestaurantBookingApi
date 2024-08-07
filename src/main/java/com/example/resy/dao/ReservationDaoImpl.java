@@ -11,6 +11,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,8 +29,8 @@ public class ReservationDaoImpl implements ReservationDao{
                 "FROM reservation res " +
                 "JOIN user_reservation userRes ON res.id = userRes.reservation_id " +
                 "WHERE userRes.user_id IN (:userIds) " +
-                "AND res.start_time >= :startTime " +
-                "AND res.end_time <= :endTime " +
+                "AND (res.start_time < :endTime " +
+                "AND res.end_time > :startTime )" +
                 "GROUP BY res.id " +
                 "ORDER BY res.start_time ASC " +
                 "LIMIT :limit OFFSET :offset";
@@ -48,7 +51,10 @@ public class ReservationDaoImpl implements ReservationDao{
                 reservation.setId(((Number) row.get("reservationId")).longValue());
                 reservation.setRestaurantId(((Number) row.get("restaurantId")).longValue());
                 reservation.setTableId(((Number) row.get("tableId")).longValue());
-                reservation.setStartTime((Date) row.get("timeStart"));
+                LocalDateTime localDateTime = (LocalDateTime) row.get("timeStart");
+                Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+                Date startTime = Date.from(instant);
+                reservation.setStartTime(startTime);
 
                 // Fetch and add the user IDs associated with this reservation
                 String userIdsString = (String) row.get("userIds");

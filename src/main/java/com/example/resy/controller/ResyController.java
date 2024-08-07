@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -21,6 +24,12 @@ public class ResyController {
 
     @GetMapping("/reservation")
     public ResponseEntity<List<Restaurant>> getReservation(SearchRequest searchRequest) {
+        try{
+            Date date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse("2024-07-24 10:15:00");
+            searchRequest.setReservationTime(date);
+        }catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
        return ResponseEntity.ok(resyFacade.searchForReservation(searchRequest));
     }
 
