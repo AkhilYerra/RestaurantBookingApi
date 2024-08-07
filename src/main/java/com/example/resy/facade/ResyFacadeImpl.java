@@ -9,6 +9,7 @@ import com.example.resy.data.error.ReservationLockException;
 import com.example.resy.data.filter.ReservationFilter;
 import com.example.resy.data.request.CreateRequest;
 import com.example.resy.data.request.SearchRequest;
+import com.example.resy.shared.SimpleCache;
 import com.example.resy.transformers.SearchRequestToReservationFilterTransformer;
 import com.example.resy.transformers.Transformer;
 import com.example.resy.util.date.DateUtil;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 public class ResyFacadeImpl implements ResyFacade{
@@ -42,6 +44,8 @@ public class ResyFacadeImpl implements ResyFacade{
 
     @Autowired
     RedissonClient redissonClient;
+
+    private final SimpleCache<Integer, List<Reservation>> reservationCache = new SimpleCache<>();
 
 
     private final Transformer<SearchRequest, ReservationFilter> reservationFilterTransformer = new SearchRequestToReservationFilterTransformer();
@@ -78,6 +82,7 @@ public class ResyFacadeImpl implements ResyFacade{
 
                 Long createdId = reservationDao.createReservation(reservation);
                 reservationDao.updateReservationUpdateTable(reservation.getUserIds(), createdId);
+                reservationCache.evictAll();
             } catch (Exception e) {
                 throw e; // Rethrow the exception to trigger rollback
             } finally {
@@ -94,13 +99,24 @@ public class ResyFacadeImpl implements ResyFacade{
         try{
             reservationDao.deleteUserReservations(reservationId);
             reservationDao.deleteReservation(reservationId);
+            reservationCache.evictAll();
         }catch (Exception e){
             throw e;
         }
     }
 
     public List<Reservation> filterForReservations(ReservationFilter filter){
-        return reservationDao.findReservations(filter);
+        int cacheKey = buildCacheKey(filter);
+        if(reservationCache.get(cacheKey) != null){
+            return reservationCache.get(cacheKey);
+        }
+        List<Reservation> reservations = reservationDao.findReservations(filter);
+        reservationCache.put(cacheKey, reservations);
+        return reservations;
+    }
+
+    private int buildCacheKey(ReservationFilter filter){
+      return filter.hashCode();
     }
 
     private boolean acquireLock(String lockKey, long waitTime, long leaseTime) throws InterruptedException {

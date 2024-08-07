@@ -4,16 +4,14 @@ import com.example.resy.data.DietaryRestriction;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Set;
 
 public class SearchRequest {
     Set<Long> userIds;
     private int minimumGuests;
-
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm")
-    private Date reservationTime;
+    private LocalDateTime reservationTime;
     Set<DietaryRestriction> dietaryRestrictions;
     private Integer pageNumber;
     private Integer pageSize;
@@ -35,11 +33,11 @@ public class SearchRequest {
         this.minimumGuests = minimumGuests;
     }
 
-    public Date getReservationTime(){
+    public LocalDateTime getReservationTime(){
         return this.reservationTime;
     }
 
-    public void setReservationTime(Date reservationTime){
+    public void setReservationTime(LocalDateTime reservationTime){
         this.reservationTime = reservationTime;
     }
 

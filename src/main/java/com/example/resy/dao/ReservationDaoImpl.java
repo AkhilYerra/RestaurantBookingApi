@@ -3,6 +3,7 @@ package com.example.resy.dao;
 import com.example.resy.data.Reservation;
 import com.example.resy.data.filter.ReservationFilter;
 import com.example.resy.data.request.SearchRequest;
+import com.example.resy.util.resultSet.ResultSetTransformerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -44,30 +45,7 @@ public class ReservationDaoImpl implements ReservationDao{
                 .addValue("offset", (filter.getPageNumber() - 1) * filter.getPageSize());
 
         List<Map<String, Object>> results = jdbcTemplate.queryForList(query, params);
-
-            List<Reservation> reservationList = new ArrayList<>();
-            for (Map<String, Object> row : results) {
-                Reservation reservation = new Reservation();
-                reservation.setId(((Number) row.get("reservationId")).longValue());
-                reservation.setRestaurantId(((Number) row.get("restaurantId")).longValue());
-                reservation.setTableId(((Number) row.get("tableId")).longValue());
-                LocalDateTime localDateTime = (LocalDateTime) row.get("timeStart");
-                Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
-                Date startTime = Date.from(instant);
-                reservation.setStartTime(startTime);
-
-                // Fetch and add the user IDs associated with this reservation
-                String userIdsString = (String) row.get("userIds");
-                List<Long> userIdsList = userIdsString != null ?
-                        Arrays.stream(userIdsString.split(","))
-                                .map(Long::parseLong)
-                                .collect(Collectors.toList())
-                        : new ArrayList<>();
-                reservation.setUserIds(userIdsList);
-
-                reservationList.add(reservation);
-            }
-            return reservationList;
+        return ResultSetTransformerUtil.transformToReservations(results);
         }
 
     @Override
@@ -119,24 +97,5 @@ public class ReservationDaoImpl implements ReservationDao{
                 .addValue("id", id);
 
         jdbcTemplate.update(DELETE_RESERVATION_QUERY, params);
-    }
-
-    public List<Reservation> filterReservations(ReservationFilter filter){
-        String checkQuery = "SELECT res.id as id, res.table_id as tableId, FROM Reservation res" +
-                "WHERE tableId = :tableId " +
-                "AND ((timeStart <= :startTime AND timeEnd > :startTime) " +
-                "OR (timeStart < :endTime AND timeEnd >= :endTime) " +
-                "OR (timeStart >= :startTime AND timeEnd <= :endTime)) " +
-                "FOR UPDATE";
-
-        //TODO: Change so filter has table Id and other fields
-//        MapSqlParameterSource checkParams = new MapSqlParameterSource()
-//                .addValue("tableId", tableId)
-//                .addValue("startTime", startTime)
-//                .addValue("endTime", endTime);
-
-//        List<Reservation> count = jdbcTemplate.queryForList(checkQuery, checkParams, Reservation.class);
-        return new ArrayList<>();
-
     }
 }

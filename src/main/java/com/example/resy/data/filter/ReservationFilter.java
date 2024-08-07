@@ -1,15 +1,19 @@
 package com.example.resy.data.filter;
 
+import com.example.resy.util.date.DateUtil;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class ReservationFilter {
     private List<Long> reservationIds;
     private Set<Long> userIds;
     private Set<Long> tableIds;
-    private Date startTime;
-    private Date endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private List<Long> restaurantIds;
     private Integer pageNumber;
     private Integer pageSize;
@@ -39,19 +43,19 @@ public class ReservationFilter {
         this.tableIds = tableIds;
     }
 
-    public Date getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public Date getEndTime() {
+    public LocalDateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
+    public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
 
@@ -77,5 +81,24 @@ public class ReservationFilter {
 
     public void setPageNumber(Integer pageNumber) {
         this.pageNumber = pageNumber;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(reservationIds, userIds, tableIds, startTime, endTime, restaurantIds, pageNumber, pageSize);
+    }
+
+    @Override
+    public String toString() {
+        return "ReservationFilter{" +
+                "reservationIds=" + reservationIds +
+                ", userIds=" + userIds +
+                ", tableIds=" + tableIds +
+                ", startTime=" + (startTime != null ? DateUtil.getFormattedDateTime(startTime) : null) +
+                ", endTime=" + (endTime != null ? DateUtil.getFormattedDateTime(endTime) : null) +
+                ", restaurantIds=" + restaurantIds +
+                ", pageNumber=" + pageNumber +
+                ", pageSize=" + pageSize +
+                '}';
     }
 }

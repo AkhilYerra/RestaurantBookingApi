@@ -4,6 +4,7 @@ import com.example.resy.data.DietaryRestriction;
 import com.example.resy.data.Restaurant;
 import com.example.resy.data.Table;
 import com.example.resy.data.request.SearchRequest;
+import com.example.resy.util.date.DateUtil;
 import jodd.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,10 +47,7 @@ public class RestaurantDaoImpl implements RestaurantDao{
 
         //We are hard coding 2 hour reservation time, we can update in the future to allow the Table object to
         // include time for table reservation as larger tables require more time while smaller tables done
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(request.getReservationTime());
-        calendar.add(Calendar.HOUR_OF_DAY, 2);
-        Date endTime = calendar.getTime();
+        LocalDateTime endTime = DateUtil.addTwoHours(request.getReservationTime());
         params.addValue("minimumGuests", request.getMinimumGuests());
         params.addValue("startTime", request.getReservationTime());
         params.addValue("endTime", endTime);

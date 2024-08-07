@@ -6,6 +6,7 @@ import com.example.resy.util.date.DateUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Component
@@ -35,7 +36,7 @@ public class SearchRequestToReservationFilterTransformer implements Transformer<
 
         if(searchRequest.getReservationTime() != null){
             filter.setStartTime(searchRequest.getReservationTime());
-            Date endTime = DateUtil.addTwoHours(searchRequest.getReservationTime());
+            LocalDateTime endTime = DateUtil.addTwoHours(searchRequest.getReservationTime());
             filter.setEndTime(endTime);
         }
 
