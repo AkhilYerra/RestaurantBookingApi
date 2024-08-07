@@ -6,6 +6,7 @@ public class Restaurant {
     public String name;
     public Long id;
     private List<Table> tableList;
+    private List<DietaryRestriction> endorsements;
     //Todo: Add location data later
 
 
@@ -31,5 +32,13 @@ public class Restaurant {
 
     public void setTableList(List<Table> tableList) {
         this.tableList = tableList;
+    }
+
+    public List<DietaryRestriction> getEndorsements() {
+        return endorsements;
+    }
+
+    public void setEndorsements(List<DietaryRestriction> endorsements) {
+        this.endorsements = endorsements;
     }
 }

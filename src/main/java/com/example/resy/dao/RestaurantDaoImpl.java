@@ -1,5 +1,6 @@
 package com.example.resy.dao;
 
+import com.example.resy.data.DietaryRestriction;
 import com.example.resy.data.Restaurant;
 import com.example.resy.data.Table;
 import com.example.resy.data.request.SearchRequest;
@@ -26,14 +27,17 @@ public class RestaurantDaoImpl implements RestaurantDao{
 
         //We could expand functionality later to order restaurants by popularity
         // or some form of popularity and rating so the better ones show up first
-        String restaurantQuery = "SELECT r.id as id, r.name as name, t.id as tableId, t.capacity AS tableCapacity" +
-                " FROM restaurant r ";
+        String restaurantQuery = "SELECT r.id as id, r.name as name, t.id as tableId, t.capacity AS tableCapacity";
         if(!CollectionUtils.isEmpty(request.getDietaryRestrictions())){
-            restaurantQuery += "JOIN restaurant_endorsement re ON r.id = re.restaurant_id ";
+            restaurantQuery += " , GROUP_CONCAT(DISTINCT re.endorsement) AS endorsements ";
         }
-        restaurantQuery += "JOIN restaurant_table t ON r.id = t.restaurant_id ";
+        restaurantQuery += " FROM restaurant r ";
         if(!CollectionUtils.isEmpty(request.getDietaryRestrictions())){
-            restaurantQuery += "WHERE re.endorsement IN (:restrictions) ";
+            restaurantQuery += " JOIN restaurant_endorsement re ON r.id = re.restaurant_id ";
+        }
+        restaurantQuery += " JOIN restaurant_table t ON r.id = t.restaurant_id ";
+        if(!CollectionUtils.isEmpty(request.getDietaryRestrictions())){
+            restaurantQuery += " WHERE re.endorsement IN (:restrictions) ";
         }
         restaurantQuery +=     "  AND t.capacity >= :minimumGuests " +
                 "  AND t.id NOT IN ( " +
@@ -52,7 +56,16 @@ public class RestaurantDaoImpl implements RestaurantDao{
         calendar.add(Calendar.HOUR_OF_DAY, 2);
         Date endTime = calendar.getTime();
 
-//        params.addValue("restrictions", request.getDietaryRestrictions());
+        if (!CollectionUtils.isEmpty(request.getDietaryRestrictions())) {
+            // Convert the list of DietaryRestriction enums to a list of strings
+            List<String> restrictionsList = request.getDietaryRestrictions().stream()
+                    .map(DietaryRestriction::name)  // Assuming name() gives you the desired string representation
+                    .collect(Collectors.toList());
+
+            // Add the list to the parameters
+            params.addValue("restrictions", restrictionsList);
+        }
+
         params.addValue("minimumGuests", request.getMinimumGuests());
         params.addValue("startTime", request.getReservationTime());
         params.addValue("endTime", endTime);
@@ -69,6 +82,15 @@ public class RestaurantDaoImpl implements RestaurantDao{
                 Restaurant restaurant = new Restaurant();
                 restaurant.setId(((Number) row.get("id")).longValue());
                 restaurant.setName((String) row.get("name"));
+                if(!CollectionUtils.isEmpty(request.getDietaryRestrictions())){
+                    String endorsementString = (String) row.get("endorsements");
+                    List<DietaryRestriction> endorsementList = endorsementString != null ?
+                            Arrays.stream(endorsementString.split(","))
+                                    .map(DietaryRestriction::valueOf)
+                                    .collect(Collectors.toList())
+                            : new ArrayList<>();
+                    restaurant.setEndorsements(endorsementList);
+                }
                 List<Table> tables = new ArrayList<>();
                 Table table = new Table();
                 table.setRestaurant_id(restaurantId);
