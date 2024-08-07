@@ -51,19 +51,22 @@ public class ReservationDaoImpl implements ReservationDao{
 
     @Override
     public List<Reservation> filterReservations(ReservationFilter filter){
-        String query = "SELECT res.id AS reservationId, res.start_time AS timeStart, res.end_time AS timeEnd, res.table_id AS tableId, res.restaurant_id AS restaurantId, " +
+        String query = "SELECT res.id AS reservationId, res.start_time AS timeStart, res.end_time AS timeEnd, res.table_id AS tableId, res.restaurant_id AS restaurantId " +
                 "FROM reservation res " +
                 "WHERE res.table_id IN (:tableIds) " +
                 "AND restaurant_id IN (:restaurantIds) " +
                 "AND (res.start_time < :endTime " +
                 "AND res.end_time > :startTime )" +
-                "GROUP BY res.id " +
                 "ORDER BY res.start_time ASC " +
                 "LIMIT :limit OFFSET :offset";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("restaurantIds", filter.getRestaurantIds())
-                .addValue("tableIds", filter.getTableIds())
+                .addValue("restaurantIds", filter.getRestaurantIds().stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(",")))
+                .addValue("tableIds", filter.getTableIds().stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(",")))
                 .addValue("startTime", filter.getStartTime())
                 .addValue("endTime", filter.getEndTime())
                 .addValue("limit", filter.getPageSize())

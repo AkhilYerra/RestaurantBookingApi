@@ -73,7 +73,10 @@ public class ResyFacadeImpl implements ResyFacade{
                 Long createdId = reservationDao.createReservation(reservation);
                 reservationDao.updateReservationUpdateTable(reservation.getUserIds(), createdId);
                 reservationCache.evictAll();
-            } catch (Exception e) {
+            }catch (ReservationAlreadyExistsException err){
+                throw err;
+            }
+            catch (Exception e) {
                 throw e; // Rethrow the exception to trigger rollback
             } finally {
                 redissonClient.getLock(lockKey).unlock();
@@ -117,9 +120,9 @@ public class ResyFacadeImpl implements ResyFacade{
     private boolean isTimeRangeAvailable(Long restaurantId, Long tableId, LocalDateTime startTime, LocalDateTime endTime) {
         ReservationFilter filter = new ReservationFilter();
         filter.setPageSize(10);
-        filter.setPageSize(1);
+        filter.setPageNumber(1);
         filter.setStartTime(startTime);
-        filter.setStartTime(endTime);
+        filter.setEndTime(DateUtil.addTwoHours(startTime));
         filter.setRestaurantIds(Collections.singletonList(restaurantId));
         filter.setTableIds(Collections.singleton(tableId));
 
