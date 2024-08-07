@@ -24,6 +24,7 @@ public class ReservationDaoImpl implements ReservationDao{
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
 
+    @Override
     public List<Reservation> findReservations(ReservationFilter filter){
         String query = "SELECT res.id AS reservationId, res.start_time AS timeStart, res.end_time AS timeEnd, res.table_id AS tableId, res.restaurant_id AS restaurantId, " +
                 "GROUP_CONCAT(userRes.user_id) AS userIds " +
@@ -47,6 +48,30 @@ public class ReservationDaoImpl implements ReservationDao{
         List<Map<String, Object>> results = jdbcTemplate.queryForList(query, params);
         return ResultSetTransformerUtil.transformToReservations(results);
         }
+
+    @Override
+    public List<Reservation> filterReservations(ReservationFilter filter){
+        String query = "SELECT res.id AS reservationId, res.start_time AS timeStart, res.end_time AS timeEnd, res.table_id AS tableId, res.restaurant_id AS restaurantId, " +
+                "FROM reservation res " +
+                "WHERE res.table_id IN (:tableIds) " +
+                "AND restaurant_id IN (:restaurantIds) " +
+                "AND (res.start_time < :endTime " +
+                "AND res.end_time > :startTime )" +
+                "GROUP BY res.id " +
+                "ORDER BY res.start_time ASC " +
+                "LIMIT :limit OFFSET :offset";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("restaurantIds", filter.getRestaurantIds())
+                .addValue("tableIds", filter.getTableIds())
+                .addValue("startTime", filter.getStartTime())
+                .addValue("endTime", filter.getEndTime())
+                .addValue("limit", filter.getPageSize())
+                .addValue("offset", (filter.getPageNumber() - 1) * filter.getPageSize());
+
+        List<Map<String, Object>> results = jdbcTemplate.queryForList(query, params);
+        return ResultSetTransformerUtil.transformToReservations(results);
+    }
 
     @Override
     @Transactional

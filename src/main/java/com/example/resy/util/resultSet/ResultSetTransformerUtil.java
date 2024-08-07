@@ -20,9 +20,7 @@ public class ResultSetTransformerUtil {
             reservation.setId(((Number) row.get("reservationId")).longValue());
             reservation.setRestaurantId(((Number) row.get("restaurantId")).longValue());
             reservation.setTableId(((Number) row.get("tableId")).longValue());
-            LocalDateTime localDateTime = (LocalDateTime) row.get("timeStart");
-            Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
-            Date startTime = Date.from(instant);
+            LocalDateTime startTime = (LocalDateTime) row.get("timeStart");
             reservation.setStartTime(startTime);
 
             // Fetch and add the user IDs associated with this reservation

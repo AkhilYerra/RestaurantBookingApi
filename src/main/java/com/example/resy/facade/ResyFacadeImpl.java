@@ -7,31 +7,23 @@ import com.example.resy.data.Restaurant;
 import com.example.resy.data.error.ReservationAlreadyExistsException;
 import com.example.resy.data.error.ReservationLockException;
 import com.example.resy.data.filter.ReservationFilter;
-import com.example.resy.data.request.CreateRequest;
 import com.example.resy.data.request.SearchRequest;
 import com.example.resy.shared.SimpleCache;
 import com.example.resy.transformers.SearchRequestToReservationFilterTransformer;
 import com.example.resy.transformers.Transformer;
 import com.example.resy.util.date.DateUtil;
-import jakarta.annotation.Resource;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Component
 public class ResyFacadeImpl implements ResyFacade{
@@ -65,7 +57,7 @@ public class ResyFacadeImpl implements ResyFacade{
     public void createReservation(Reservation reservation) throws InterruptedException {
         String lockKey = "reservationLock:" + reservation.getRestaurantId() + ":" + reservation.getTableId();
 
-        if (acquireLock(lockKey, 25, 5)) {
+        if (acquireLock(lockKey)) {
             try {
                 boolean available = isTimeRangeAvailable(reservation.getRestaurantId(), reservation.getTableId(), reservation.getStartTime(), reservation.getEndTime());
                 if (!available) {
@@ -73,10 +65,8 @@ public class ResyFacadeImpl implements ResyFacade{
                 }
 
                 if (reservation.getEndTime() == null) {
-                    // TODO: Defaulting behavior Remove this
-                    Date date = DateUtil.createDate("2024-07-24 12:15:00");
-                    reservation.setStartTime(date);
-                    Date endTime = DateUtil.addTwoHours(reservation.getStartTime());
+                    reservation.setStartTime(reservation.getStartTime());
+                    LocalDateTime endTime = DateUtil.addTwoHours(reservation.getStartTime());
                     reservation.setEndTime(endTime);
                 }
 
@@ -119,13 +109,27 @@ public class ResyFacadeImpl implements ResyFacade{
       return filter.hashCode();
     }
 
-    private boolean acquireLock(String lockKey, long waitTime, long leaseTime) throws InterruptedException {
+    private boolean acquireLock(String lockKey) throws InterruptedException {
         RLock lock = redissonClient.getLock(lockKey);
-        return lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
+        return lock.tryLock(60, 10, TimeUnit.SECONDS);
     }
 
-    private boolean isTimeRangeAvailable(Long restaurantId, Long tableId, Date startTime, Date endTime) {
-        // TODO: Implement the logic to check if the time range is available
-        return true; // Placeholder
+    private boolean isTimeRangeAvailable(Long restaurantId, Long tableId, LocalDateTime startTime, LocalDateTime endTime) {
+        ReservationFilter filter = new ReservationFilter();
+        filter.setPageSize(10);
+        filter.setPageSize(1);
+        filter.setStartTime(startTime);
+        filter.setStartTime(endTime);
+        filter.setRestaurantIds(Collections.singletonList(restaurantId));
+        filter.setTableIds(Collections.singleton(tableId));
+
+        int hashKey = filter.hashCode();
+
+        if(reservationCache.get(hashKey) != null){
+            return CollectionUtils.isEmpty(reservationCache.get(hashKey));
+        }
+        List<Reservation> existingReservations = reservationDao.filterReservations(filter);
+        reservationCache.put(hashKey, existingReservations);
+        return CollectionUtils.isEmpty(existingReservations);
     }
 }

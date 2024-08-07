@@ -1,13 +1,13 @@
 package com.example.resy.data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Reservation {
     private Long id;
     private Long tableId;
-    private Date startTime;
-    private Date endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private List<Long> userIds;
     private Long restaurantId;
 
@@ -42,19 +42,19 @@ public class Reservation {
         this.restaurantId = restaurantId;
     }
 
-    public Date getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public Date getEndTime() {
+    public LocalDateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
+    public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
 }
