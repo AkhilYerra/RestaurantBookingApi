@@ -5,6 +5,7 @@ import com.example.resy.data.Restaurant;
 import com.example.resy.data.Table;
 import com.example.resy.data.request.SearchRequest;
 import com.example.resy.util.date.DateUtil;
+import com.example.resy.util.resultSet.ResultSetTransformerUtil;
 import jodd.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -56,41 +57,13 @@ public class RestaurantDaoImpl implements RestaurantDao{
 
         List<Map<String, Object>> rawSQLResults = jdbcTemplate.queryForList(restaurantQuery, params);
 
-        Map<Long, Restaurant> restaurantMap = new HashMap<>();
-        List<Restaurant> restaurantList = new ArrayList<>();
-        for (Map<String, Object> row : rawSQLResults) {
-            Long restaurantId = ((Number) row.get("id")).longValue();
-            if(restaurantMap.get(restaurantId) == null){
-                Restaurant restaurant = new Restaurant();
-                restaurant.setId(((Number) row.get("id")).longValue());
-                restaurant.setName((String) row.get("name"));
-                String endorsementString = (String) row.get("endorsements");
-                Set<DietaryRestriction> endorsementList = endorsementString != null ?
-                        Arrays.stream(endorsementString.split(","))
-                                .map(DietaryRestriction::valueOf)
-                                .collect(Collectors.toSet())
-                        : new HashSet<>();
-                    restaurant.setEndorsements(endorsementList);
-                List<Table> tables = new ArrayList<>();
-                Table table = new Table();
-                table.setRestaurant_id(restaurantId);
-                table.setId(((Number) row.get("tableId")).longValue());
-                table.setCapacity(((Number) row.get("tableCapacity")).intValue());
-                tables.add(table);
-                restaurant.setTableList(tables);
-                restaurantMap.put(restaurantId, restaurant);
-            }else{
-                Table table = new Table();
-                table.setRestaurant_id(restaurantId);
-                table.setId(((Number) row.get("tableId")).longValue());
-                table.setCapacity(((Number) row.get("tableCapacity")).intValue());
-                restaurantMap.get(restaurantId).getTableList().add(table);
-            }
-        }
-        if(CollectionUtils.isEmpty(restaurantMap.values())){
+
+        List<Restaurant> restaurantList = ResultSetTransformerUtil.transformToRestaurant(rawSQLResults);
+
+        if(CollectionUtils.isEmpty(restaurantList)){
             return new ArrayList<>();
         }
-        List<Restaurant> filteredRestaurants = restaurantMap.values().stream()
+        List<Restaurant> filteredRestaurants = restaurantList.stream()
                 .filter(restaurant -> {
                     if(CollectionUtils.isEmpty(request.getDietaryRestrictions())){
                         return true;
