@@ -46,8 +46,12 @@ public class ResyController {
 
     @DeleteMapping("/reservation/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long reservationId) {
+        //Would need some kind of authorization test here. Ensure User A cant delete User B resy.
         resyFacade.deleteReservation(reservationId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    //Need a basic filter call for reservations for a specific user for FE to use at some point.
+    // Possible we can leverage the already existing getReservation and make the SQL query more dynamic so we can search only based on user id.
 
 }
