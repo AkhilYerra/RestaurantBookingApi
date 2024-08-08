@@ -52,7 +52,6 @@ public class ResyFacadeImplTests {
     @Test
     public void testSearchForReservation_NoExistingReservations() {
         SearchRequest searchRequest = new SearchRequest();
-        // Set up searchRequest properties
 
         when(reservationDao.findReservations(any(ReservationFilter.class)))
                 .thenReturn(Collections.emptyList());
@@ -68,7 +67,6 @@ public class ResyFacadeImplTests {
     @Test
     public void testCreateReservation_LockNotAcquired() throws InterruptedException {
         Reservation reservation = new Reservation();
-        // Set up reservation properties
 
         when(rLock.tryLock(anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(false);
 
@@ -89,7 +87,6 @@ public class ResyFacadeImplTests {
     @Test
     public void testFilterForReservations_WithoutCache() {
         ReservationFilter filter = new ReservationFilter();
-        // Set up filter properties
 
         List<Reservation> reservations = Collections.singletonList(new Reservation());
         when(reservationDao.findReservations(filter)).thenReturn(reservations);

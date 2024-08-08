@@ -45,7 +45,6 @@ public class SearchRequestToReservationFilterTransformer implements Transformer<
 
     @Override
     public SearchRequest transformToA(ReservationFilter reservationFilter) {
-        // Implement the transformation logic from ReservationFilter to SearchRequest
         return null;
     }
 }

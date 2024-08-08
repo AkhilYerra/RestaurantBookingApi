@@ -12,7 +12,6 @@ public class RedissonConfig {
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
-        // Configure Redis connection details here
         config.useSingleServer().setAddress("redis://localhost:6379");
 
         return Redisson.create(config);
