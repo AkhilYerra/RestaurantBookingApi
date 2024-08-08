@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class SearchRequest {
     Set<Long> userIds;
-    private int minimumGuests;
+    private Integer minimumGuests;
     private LocalDateTime reservationTime;
     Set<DietaryRestriction> dietaryRestrictions;
     private Integer pageNumber;
@@ -25,11 +25,11 @@ public class SearchRequest {
         this.userIds = userIds;
     }
 
-    public int getMinimumGuests(){
+    public Integer getMinimumGuests(){
         return minimumGuests;
     }
 
-    public void setMinimumGuests(int minimumGuests){
+    public void setMinimumGuests(Integer minimumGuests){
         this.minimumGuests = minimumGuests;
     }
 

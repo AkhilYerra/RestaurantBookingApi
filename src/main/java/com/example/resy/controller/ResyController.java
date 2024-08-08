@@ -5,6 +5,7 @@ import com.example.resy.data.Restaurant;
 import com.example.resy.data.request.CreateRequest;
 import com.example.resy.data.request.SearchRequest;
 import com.example.resy.facade.ResyFacade;
+import com.example.resy.validator.RequestValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +25,18 @@ public class ResyController {
 
     @GetMapping("/reservation")
     public ResponseEntity<List<Restaurant>> getReservation(SearchRequest searchRequest) {
-       return ResponseEntity.ok(resyFacade.searchForReservation(searchRequest));
+        try{
+            RequestValidator.isSearchRequestValid(searchRequest);
+            return ResponseEntity.ok(resyFacade.searchForReservation(searchRequest));
+        }catch (Exception err){
+            throw err;
+        }
     }
 
     @PostMapping("/reservation")
     public ResponseEntity<Void> createReservation(@RequestBody Reservation reservation) {
         try {
+            RequestValidator.isReservationCreateValid(reservation);
             resyFacade.createReservation(reservation);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (InterruptedException e) {

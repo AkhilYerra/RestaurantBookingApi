@@ -4,8 +4,10 @@ com/example/resy/util/resultSet/ResultSetTransformerUtil.class
 com/example/resy/dao/ReservationDao.class
 com/example/resy/controller/ResyController.class
 com/example/resy/dao/RestaurantDaoImpl.class
+com/example/resy/validator/RequestValidator.class
 com/example/resy/shared/SimpleCache.class
 com/example/resy/data/error/GenericException.class
+com/example/resy/data/error/ValidationException.class
 com/example/resy/facade/ResyFacade.class
 com/example/resy/dao/ReservationDaoImpl.class
 com/example/resy/transformers/SearchRequestToReservationFilterTransformer.class

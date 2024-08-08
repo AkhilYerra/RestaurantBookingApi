@@ -15,6 +15,7 @@
 /Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/data/error/GenericException.java
 /Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/data/error/ReservationAlreadyExistsException.java
 /Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/data/error/ReservationLockException.java
+/Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/data/error/ValidationException.java
 /Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/data/filter/ReservationFilter.java
 /Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/data/request/CreateRequest.java
 /Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/data/request/SearchRequest.java
@@ -25,3 +26,4 @@
 /Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/transformers/Transformer.java
 /Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/util/date/DateUtil.java
 /Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/util/resultSet/ResultSetTransformerUtil.java
+/Users/AkhilY/git/RestaurantBookingApi/src/main/java/com/example/resy/validator/RequestValidator.java
