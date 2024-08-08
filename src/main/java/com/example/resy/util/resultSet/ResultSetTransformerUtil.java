@@ -5,9 +5,7 @@ import com.example.resy.data.Reservation;
 import com.example.resy.data.Restaurant;
 import com.example.resy.data.Table;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,6 +67,6 @@ public class ResultSetTransformerUtil {
                 restaurantMap.get(restaurantId).getTableList().add(table);
             }
         }
-        return restaurantMap.values().stream().collect(Collectors.toList());
+        return new ArrayList<>(restaurantMap.values());
     }
 }
